@@ -1,6 +1,7 @@
 import express from "express";
 import {createServer} from "node:http"
 import { Server } from 'socket.io';
+import { Msg } from "./db/db.js";
 
 const port = process.env.PORT ?? 4000
 //creación de servidor
@@ -11,17 +12,21 @@ app.use(express.static('public'));
 //websocket conexión
 io.on('connection', async (socket) => {
     console.log('a user has connected!')
+    const ipAddr = socket.handshake.address.slice(7)
+  
     
     //escuchamos los tipos de conexiones del cliente
-    socket.on('chat message', (msg) =>{
-       const username =  socket.handshake.auth.username
-        console.log(msg)
-        console.log("username: ",username)
+    socket.on('chat message', (msgRecived, username) =>{
+       const userName =  username
+       
+        console.log("username: ",userName)
+        Msg.create({username:userName, msg:msgRecived, ip: ipAddr})
     })
 
 
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg, socket.handshake.auth.username);
+    socket.on('chat message', (msg,username) => {
+        io.emit('chat message', msg, username);
+        
       });
 
 

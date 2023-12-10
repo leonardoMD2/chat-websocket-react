@@ -5,87 +5,52 @@
     <title>Web socket chat 1.0</title>
     <script type="module">
        import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
-       const fruits = [
-      // Frutas cítricas
-      "naranja",
-      "mandarina",
-      "limón",
-      "lima",
-      "pomelo",
-      "toronja",
-      "pomelo rosado",
-      "bergamote",
-      "clementina",
-      "satsuma",
-
-      // Frutas dulces
-      "manzana",
-      "pera",
-      "melocotón",
-      "nectarina",
-      "albaricoque",
-      "cereza",
-      "ciruela",
-      "fresa",
-      "frambuesa",
-      "mora",
-      "arándano",
-      "grosella",
-      "piña",
-      "mango",
-      "papaya",
-      "banana",
-      "plátano",
-
-      // Frutas tropicales
-      "aguacate",
-      "coco",
-      "maracuyá",
-      "guanábana",
-      "pitaya",
-      "zapote",
-      "mangostán",
-      "rambután",
-      "longan",
-      "durian",
-
-      // Frutas exóticas
-      "higo chumbo",
-      "granada",
-      "physalis",
-      "kiwi",
-      "caqui",
-      "kaki",
-      "dátil",
-      "higo",
-      "feijoa",
-      "granadilla",
-    ];
-    
-    const selectUserRandom = () => {
-      const indice = Math.floor(Math.random() * fruits.length)
-      console.log(indice, fruits.length)
-      const user = fruits[indice]
-      return user
-    }
-
-
-        const socket = io({
-          auth:{
-            username: selectUserRandom()
-          }
-        })
-
+       let alert;
         const input = document.getElementById('input')
         const form = document.getElementById('form')
         const messages = document.getElementById('messages')
+        const main = document.getElementById('main')
+        let borrar = false;
+   
 
+        
+        const socket = io({
+          auth:{
+            username: ""
+          }
+        })
+
+    
+        
         form.addEventListener('submit', (e)=>{
             e.preventDefault()
+          
+      
             if(input.value){
-            socket.emit('chat message', input.value, socket.auth.username)
-            input.value = ""
-        } })
+              const username = document.getElementById('inputUser').value; // Get username from input
+              if(username != ""){
+                console.log("USER: ", username);
+                socket.emit('chat message', input.value, username)
+                input.value = ""
+                if(borrar){
+           
+                  alert.classList.add("inactive")
+                }
+              
+              }else{
+             
+                alert = document.createElement('p')
+                alert.textContent = "No se puede enviar msj sin username"
+                alert.classList.add("active")
+                
+                main.appendChild(alert)
+                borrar = true
+              }
+              
+        }      
+      })
+
+    
 
         socket.on('chat message', (msg,username) =>{
           const item = `<li>
@@ -100,6 +65,13 @@
 
       </script>
     <style>
+      
+      .active{
+        justify-self: center;
+      }
+      .inactive{
+        display: none;
+      }
       body{
         box-sizing: border-box;
         padding: 0;
@@ -107,11 +79,18 @@
         background-color: #17202A;
       }
       main{
+        display: grid;
+        grid-template-columns: 1fr;
+        place-content: center;
+        width: 70%;
+        margin: 0 auto ;
+      }
+      .chat{
         padding: 0 0 25px 0;
         margin: 0 auto;
         display: grid;
         width: 75%;
-        height: 95vh;
+        height:88vh;
         grid-template-rows: 2fr;
         place-content: center;
       }
@@ -160,6 +139,10 @@
       border: none;
       
      }
+     .username{
+      display: grid;
+      place-content: center;
+     }
      form, input{
       width: 100%;
       border: none;
@@ -180,14 +163,41 @@
       color: aliceblue;
       font-weight: bolder;
      }
+     label{
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: aliceblue;
+      font-weight: bolder;
+     }
+     h1{
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: aliceblue;
+      font-weight: bolder;
+      text-align: center;
+     }
+     @media (max-width:480px){
+      main{
+      
+    
+      height: 90dvh;
+      }
+     }
     </style>
   </head>
   <body>
-    <main>
+    <h1>Web socket chat 1.0 - Socket.io</h1>
+    <main id="main">
+
+      <section class="chat">
       <ul id="messages"></ul>
       <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
+
+        <label for="inputUser">Username:
+        <input id="inputUser" autocomplete="off"/>
+        </label>
+        <input id="input" autocomplete="off" />
+        <button>Send</button>
       </form>
+    </section>
   </main>
    
   </body>
